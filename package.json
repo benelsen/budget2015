@@ -1,0 +1,14 @@
+{
+  "name": "budget2015",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generate.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "xlsjs": "^0.7.1"
+  },
+  "private": true
+}
