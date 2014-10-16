@@ -3,6 +3,7 @@
 var fs   = require('fs');
 var path = require('path');
 var xls  = require('xlsjs');
+var stringify = require('csv-stringify');
 
 var workbook = xls.readFile('budget.xls');
 
@@ -36,6 +37,41 @@ var data = {
 
 var json = JSON.stringify(data, null, '  ');
 fs.writeFileSync( 'budget.json', json, 'utf8' );
+
+var dataFlat = Array.prototype.concat(
+  data.depenses.reduce(flatten.bind(null, 'depenses'), []),
+  data.recettes.reduce(flatten.bind(null, 'recettes'), [])
+);
+
+var jsonFlat = JSON.stringify(dataFlat, null, '  ');
+fs.writeFileSync( 'budget_flat.json', jsonFlat, 'utf8' );
+
+var dataCSV = dataFlat.map( function (d) {
+  
+  Object.keys(d.years).forEach(function (k) {
+    
+    d[k] = d.years[k];
+
+  });
+
+  delete d.years;
+
+  return ['type', 'chapter', 'chapterTitle', 'department', 'departmentTitle', 
+          'section', 'sectionTitle', 'article', 'articleTitle', '2013', '2014', 
+          '2015', '2016', '2017', '2018' ].map(function (k) {
+    return d[k];
+  });
+
+});
+
+var csvFlat = stringify(dataCSV, {
+  columns: ['type', 'chapter', 'chapterTitle', 'department', 'departmentTitle', 
+            'section', 'sectionTitle', 'article', 'articleTitle', '2013', '2014', 
+            '2015', '2016', '2017', '2018' ],
+  header: true
+}, function (err, csv) {
+  fs.writeFileSync( 'budget_flat.csv', csv, 'utf8' );
+});
 
 function parseLines (lines) {
 
@@ -156,6 +192,28 @@ function parseLines (lines) {
 
 }
 
+function flatten (type, memo, parent) {
+
+  if ( !parent.children ) {
+    parent.type = type;
+    parent.article = parent.number;
+    parent.articleTitle = parent.title;
+    delete parent.number;
+    delete parent.title;
+    return memo.concat(parent);
+  }
+
+  var children = parent.children
+    .reduce(flatten.bind(null, type), [])
+    .map(function (d) {
+      d[ parent.type ] = parent.number;
+      d[ parent.type + 'Title' ] = parent.title;
+      return d;
+    });
+
+  return memo.concat(children);
+
+}
 
 function parseNumber (str) {
 

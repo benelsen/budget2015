@@ -1,5 +1,5 @@
 
-budget.json: budget.xls
+generate: budget.xls
 	node generate.js
 
 budget.xls:

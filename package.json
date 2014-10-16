@@ -8,6 +8,7 @@
   "dependencies": {
   },
   "devDependencies": {
+    "csv-stringify": "0.0.3",
     "xlsjs": "^0.7.1"
   },
   "private": true
